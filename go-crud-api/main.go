@@ -22,10 +22,33 @@ func main() {
 
 // Using Gin framework for a more structured approach
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"time"
 )
 
+var collection *mongo.Collection
+
+func connectDB() {
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Println("⛔ MongoDB connection error!")
+		log.Fatal(err)
+	}
+	
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection = client.Database("taskdbs").Collection("tasks")
+	log.Println("✅ Connected to MongoDB!")
+}
+
 func main() {
+	connectDB()
 	router := gin.Default()
 
 	// Define a simple route
