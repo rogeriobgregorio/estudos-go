@@ -24,9 +24,11 @@ func main() {
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"go-crud-api/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"net/http"
 	"time"
 )
 
@@ -36,15 +38,33 @@ func connectDB() {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Println("⛔ MongoDB connection error!")
-		log.Fatal(err)
+		log.Fatal("⛔ MongoDB connection error:", err)
 	}
-	
+
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	collection = client.Database("taskdbs").Collection("tasks")
 	log.Println("✅ Connected to MongoDB!")
+}
+
+func createTask(c *gin.Context) {
+	var task models.Task
+	if err := c.ShouldBindJSON(&task); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	task.CreatedAt = time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	result, err := collection.InsertOne(ctx, task)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"id": result.InsertedID})
 }
 
 func main() {
@@ -56,8 +76,11 @@ func main() {
 		c.JSON(200, gin.H{"message": "Hello, World!"})
 	})
 
-	// Start the server on port 8080
+	// Define a route for creating tasks
+	router.POST("/tasks", createTask)
+
+	// Start the server on port 8080 and handle errors
 	if err := router.Run(":8080"); err != nil {
-		panic(err)
+		log.Fatal("⛔ Error starting server:", err)
 	}
 }
