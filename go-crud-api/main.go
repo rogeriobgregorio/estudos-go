@@ -1,37 +1,28 @@
 package main
 
-// This is a simple HTTP server that responds with "Hello, World!" on the root path.
-/*
-import (
-	"fmt"
-	"net/http"
-)
+// @title   		Task Management API
+// @version 		1.0
+// @description API for managing tasks using Go, Gin, and MongoDB.
+// @host 				localhost:8080
+// @BasePath 		/
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, World!")
-}
-
-func main() {
-	http.HandleFunc("/", handler)
-	fmt.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		fmt.Println("Error starting server:", err)
-	}
-}
-*/
-
-// Using Gin framework for a more structured approach
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"go-crud-api/models"
+	"log"
+	"net/http"
+	"time"
+
+	_ "go-crud-api/docs" // This line is necessary for go-swagger to find the docs
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"net/http"
-	"time"
 )
 
 var collection *mongo.Collection
@@ -50,6 +41,16 @@ func connectDB() {
 	log.Println("✅ Connected to MongoDB!")
 }
 
+// @Summary 		Create a new task
+// @Description Create a new task
+// @Tags 				tasks
+// @Accept 			json
+// @Produce 		json
+// @Param 			task 		body 			models.Task 						true "Task data"
+// @Sucess 			201 		{object} 	map[string]interface{}
+// @Failure 		400 		{object} 	map[string]string
+// @Failure 		500 		object} 	map[string]string
+// @Router 			/tasks 	[post]
 func createTask(c *gin.Context) {
 	var task models.Task
 	if err := c.ShouldBindJSON(&task); err != nil {
@@ -69,6 +70,13 @@ func createTask(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"id": result.InsertedID})
 }
 
+// @Summary 		List all tasks
+// @Description List all tasks
+// @Tags 				tasks
+// @Produce 		json
+// @Sucess 			200 		{array} 	models.Task
+// @Failure 		500 		{object} 	map[string]string
+// @Router 			/tasks 	[get]
 func listTasks(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -89,6 +97,18 @@ func listTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// @Summary 		Update a task
+// @Description Update a task by ID
+// @Tags 				tasks
+// @Accept 			json
+// @Produce 		json
+// @Param 			id 		path 			string 						true "Task ID"
+// @Param 			task 	body 			models.Task 			true "Updated task data"
+// @Sucess 			200 	{object} 	map[string]string
+// @Failure 		400 	{object} 	map[string]string
+// @Failure 		404 	{object} 	map[string]string
+// @Failure 		500 	{object} 	map[string]string
+// @Router 			/tasks/{id} 		[put]
 func updateTask(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
@@ -119,6 +139,16 @@ func updateTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task updated"})
 }
 
+// @Summary 		Delete a task
+// @Description Delete a task by ID
+// @Tags 				tasks
+// @Produce 		json
+// @Param 			id 		path 			string 						true "Task ID"
+// @Sucess 			200 	{object} 	map[string]string
+// @Failure 		400 	{object} 	map[string]string
+// @Failure 		404 	{object} 	map[string]string
+// @Failure 		500 	{object} 	map[string]string
+// @Router 			/tasks/{id} 		[delete]
 func deleteTask(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
@@ -146,6 +176,9 @@ func deleteTask(c *gin.Context) {
 func main() {
 	connectDB()
 	router := gin.Default()
+
+	// Swagger endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Define a simple route
 	router.GET("/", func(c *gin.Context) {
