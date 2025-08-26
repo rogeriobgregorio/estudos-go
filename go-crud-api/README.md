@@ -10,15 +10,6 @@ Este repositório contém o projeto desenvolvido durante o curso **"Aprenda a de
 * **Docker**: 📦 Containerização da aplicação para facilitar o desenvolvimento e implantação.
 * **Swagger (OpenAPI)**: 📄 Para documentação e testes da API.
 
-## 📂 Estrutura do Projeto
-
-O projeto está organizado seguindo os princípios da **Clean Architecture**, dividindo a aplicação em camadas distintas para garantir a escalabilidade e a manutenibilidade do código.
-
-1. **Core**: 🔑 Contém os casos de uso e entidades do domínio.
-2. **API**: 🌐 Implementação dos endpoints RESTful.
-3. **Infrastructure**: 🔌 Conexão com o banco de dados MongoDB e integração com outras dependências externas.
-4. **Docs**: 📚 Documentação da API utilizando Swagger.
-
 ## ⚙️ Como Executar o Projeto
 
 ### Pré-requisitos
