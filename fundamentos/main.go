@@ -1,9 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
 	"io"
+	"net/http"
 )
 
 // The init function is called before the main function
@@ -17,18 +18,38 @@ func main() {
 	// Fazendo uma requisição HTTP
 	resp, err := http.Get("http://example.com/") // Faz uma requisição GET para o URL especificado
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Erro ao fazer a requisição: %w", err)
 		return
 	}
 	defer resp.Body.Close() // Fecha o corpo da resposta quando a função main termina
-	
+
 	body, err := io.ReadAll(resp.Body) // Lê o corpo da resposta
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Erro ao ler o corpo da resposta: %w", err)
 		return
 	}
 	fmt.Println("Response Body:", string(body)) // Exibe o corpo da resposta
 
+	type Pessoa []struct { // Definindo o tipo Pessoa como um slice de structs
+		Nome  string
+		Idade int
+	}
+
+	var pessoas Pessoa // Criando um slice de pessoas
+
+	// Fazendo o unmarshal do JSON
+	// unmarshal é o processo de decodificação de dados JSON em estruturas de dados do Go
+	if err := json.Unmarshal(body, &pessoas); err != nil {
+		fmt.Println("Erro ao fazer o unmarshal do JSON: %w", err)
+		return
+	}
+
+	// Exibindo informações das pessoas
+	for _, p := range pessoas {
+		fmt.Printf("Nome: %s, Idade: %d\n", p.Nome, p.Idade)
+	}
+
+	// Chamadas das funções
 	inicializaVariaveis()
 	exibeMensagens()
 	condicoes()
@@ -384,23 +405,23 @@ func imprimir[T any](valor T) {
 
 // Função genérica para somar dois valores
 func Somar[T int | float64](a, b T) T {
-    return a + b
+	return a + b
 }
 
 type Pessoa struct {
-    Nome string
-    Idade int
+	Nome  string
+	Idade int
 }
 
 // Método vinculado ao tipo Pessoa
 func (p Pessoa) Apresentar() string {
-    return fmt.Sprintf("Olá, me chamo %s e tenho %d anos", p.Nome, p.Idade)
+	return fmt.Sprintf("Olá, me chamo %s e tenho %d anos", p.Nome, p.Idade)
 }
 
 // Método com receptor de ponteiro
 // Faz com que a função modifique o valor original
 func (p *Pessoa) FazerAniversario() {
-    p.Idade++
+	p.Idade++
 }
 
 // Função que retorna uma função (closure)
@@ -408,12 +429,13 @@ func (p *Pessoa) FazerAniversario() {
 // e permitindo que ele seja incrementado a cada chamada
 // ou seja, ela captura o estado da variável contador mesmo após a função ter sido executada
 func geraContador() func() int {
-    contador := 0
-    return func() int {
-        contador++
-        return contador
-    }
+	contador := 0
+	return func() int {
+		contador++
+		return contador
+	}
 }
+
 // Exemplo de uso de closure contador
 func exemploContador() {
 	// Cria um contador
@@ -428,7 +450,7 @@ func exemploContador() {
 }
 
 type StringWriter interface {
-    WriteString(string) (int, error)
+	WriteString(string) (int, error)
 }
 
 type MyWriter struct{}
@@ -436,8 +458,8 @@ type MyWriter struct{}
 // WriteString implementa o método WriteString da interface StringWriter
 // dessa forma, MyWriter pode ser usado como um StringWriter
 func (w MyWriter) WriteString(s string) (int, error) {
-    fmt.Print(s)
-    return len(s), nil
+	fmt.Print(s)
+	return len(s), nil
 }
 
 // Usos da palavra reservada type
@@ -447,22 +469,23 @@ type MeuInt int
 
 // Método associado ao novo tipo
 func (m MeuInt) Dobrar() MeuInt {
-    return m * 2
+	return m * 2
 }
 
 // Definição de uma interface
 type MyInterface interface {
-    WriteString(string) (int, error)
+	WriteString(string) (int, error)
 }
 
 // Definição de uma estrutura
 type MyStruct struct {
-    Field1 string
-    Field2 int
+	Field1 string
+	Field2 int
 }
 
 // Definição de alias
 type MeuAlias = MeuInt
+
 // Uso do alias
 var x MeuAlias = 10
 
