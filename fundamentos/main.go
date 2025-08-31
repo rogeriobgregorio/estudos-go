@@ -37,6 +37,7 @@ func main() {
 	exemploContador()
 	imprimir(10)
 	imprimir("Hello, Generics!")
+	exemploAlias()
 }
 
 func inicializaVariaveis() {
@@ -419,4 +420,35 @@ type MyWriter struct{}
 func (w MyWriter) WriteString(s string) (int, error) {
     fmt.Print(s)
     return len(s), nil
+}
+
+// Usos da palavra reservada type
+
+// Definição de um novo tipo baseado em um tipo existente
+type MeuInt int
+
+// Método associado ao novo tipo
+func (m MeuInt) Dobrar() MeuInt {
+    return m * 2
+}
+
+// Definição de uma interface
+type MyInterface interface {
+    WriteString(string) (int, error)
+}
+
+// Definição de uma estrutura
+type MyStruct struct {
+    Field1 string
+    Field2 int
+}
+
+// Definição de alias
+type MeuAlias = MeuInt
+// Uso do alias
+var x MeuAlias = 10
+
+// Função para exemplificar o uso do alias
+func exemploAlias() {
+	fmt.Println(x.Dobrar())
 }
