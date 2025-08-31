@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"io"
 )
 
 // The init function is called before the main function
@@ -11,6 +13,22 @@ func init() {
 }
 
 func main() {
+
+	// Fazendo uma requisição HTTP
+	resp, err := http.Get("http://example.com/") // Faz uma requisição GET para o URL especificado
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	defer resp.Body.Close() // Fecha o corpo da resposta quando a função main termina
+	
+	body, err := io.ReadAll(resp.Body) // Lê o corpo da resposta
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Response Body:", string(body)) // Exibe o corpo da resposta
+
 	inicializaVariaveis()
 	exibeMensagens()
 	condicoes()
